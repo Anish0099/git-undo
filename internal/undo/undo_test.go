@@ -81,6 +81,85 @@ func TestUndoDryRunChangesNothing(t *testing.T) {
 	}
 }
 
+func TestUndoCommitKeepsChangesStaged(t *testing.T) {
+	newRepo(t)
+	writeCommit(t, "a.txt", "a")
+	writeCommit(t, "b.txt", "b")
+	parent := git(t, "rev-parse", "HEAD~1")
+
+	code := Run(Options{}, strings.NewReader("y\n"), &strings.Builder{})
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	if got := git(t, "rev-parse", "HEAD"); got != parent {
+		t.Fatalf("HEAD = %s, want restored parent %s", got, parent)
+	}
+}
+
+func TestUndoAmendRestoresPreAmendCommit(t *testing.T) {
+	newRepo(t)
+	writeCommit(t, "a.txt", "a")
+	writeCommit(t, "b.txt", "b")
+	c1 := git(t, "rev-parse", "HEAD")
+
+	if err := exec.Command("sh", "-c", "printf 'b2' > b.txt").Run(); err != nil {
+		t.Fatal(err)
+	}
+	git(t, "add", "-A")
+	git(t, "commit", "-q", "--amend", "--no-edit")
+
+	if amended := git(t, "rev-parse", "HEAD"); amended == c1 {
+		t.Fatal("amend did not change HEAD; test setup is broken")
+	}
+
+	code := Run(Options{}, strings.NewReader("y\n"), &strings.Builder{})
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	if got := git(t, "rev-parse", "HEAD"); got != c1 {
+		t.Fatalf("HEAD = %s, want pre-amend commit %s", got, c1)
+	}
+}
+
+func TestUndoMergeRestoresPreMergeState(t *testing.T) {
+	newRepo(t)
+	writeCommit(t, "a.txt", "a")
+	baseBranch := git(t, "rev-parse", "--abbrev-ref", "HEAD")
+	git(t, "checkout", "-b", "feature")
+	writeCommit(t, "c.txt", "c")
+	git(t, "checkout", baseBranch)
+	writeCommit(t, "b.txt", "b")
+	premerge := git(t, "rev-parse", "HEAD")
+	git(t, "merge", "--no-ff", "--no-edit", "feature")
+
+	code := Run(Options{}, strings.NewReader("y\n"), &strings.Builder{})
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	if got := git(t, "rev-parse", "HEAD"); got != premerge {
+		t.Fatalf("HEAD = %s, want pre-merge commit %s", got, premerge)
+	}
+}
+
+func TestUndoUnsupportedTopFallsToList(t *testing.T) {
+	newRepo(t)
+	writeCommit(t, "a.txt", "a")
+	writeCommit(t, "b.txt", "b")
+	before := git(t, "rev-parse", "HEAD")
+	git(t, "reset", "--hard", "HEAD~1")
+	// An unsupported action (checkout) on top of the reflog stack.
+	git(t, "checkout", "-b", "scratch")
+
+	var out strings.Builder
+	code := Run(Options{}, strings.NewReader("2\ny\n"), &out)
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0\noutput:\n%s", code, out.String())
+	}
+	if got := git(t, "rev-parse", "HEAD"); got != before {
+		t.Fatalf("HEAD = %s, want restored %s\noutput:\n%s", got, before, out.String())
+	}
+}
+
 func TestUndoDeclineThenPickExecutes(t *testing.T) {
 	newRepo(t)
 	writeCommit(t, "a.txt", "a")

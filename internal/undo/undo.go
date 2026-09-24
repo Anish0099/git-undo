@@ -61,7 +61,16 @@ func Run(opts Options, in io.Reader, out io.Writer) int {
 		p := plan.Build(chosen)
 		if !p.Supported {
 			fmt.Fprint(out, tui.RenderPreview(chosen, p, safety.Verdict{}))
-			return 0
+			if opts.DryRun {
+				return 0
+			}
+			idx, _ := tui.SelectFromList(br, out, actions)
+			if idx < 0 {
+				fmt.Fprintln(out, "Cancelled. Nothing was changed.")
+				return 0
+			}
+			chosen = actions[idx]
+			continue
 		}
 		st, err := gitcmd.ReadState()
 		if err != nil {

@@ -42,7 +42,7 @@ func Build(a detect.Action) UndoPlan {
 		return UndoPlan{
 			Supported:           true,
 			Description:         "Undo the last commit, keeping all your changes staged.",
-			Commands:            [][]string{{"reset", "--soft", "HEAD~1"}},
+			Commands:            [][]string{{"reset", "--soft", a.Entry.Old}},
 			ClobbersWorkingTree: false,
 		}
 	case detect.KindMerge:

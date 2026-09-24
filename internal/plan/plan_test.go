@@ -27,8 +27,18 @@ func TestBuildCommitSoftReset(t *testing.T) {
 	if !p.Supported || p.ClobbersWorkingTree {
 		t.Fatalf("commit undo should be supported and non-clobbering: %+v", p)
 	}
-	if len(p.Commands) != 1 || p.Commands[0][0] != "reset" || p.Commands[0][1] != "--soft" || p.Commands[0][2] != "HEAD~1" {
+	if len(p.Commands) != 1 || p.Commands[0][0] != "reset" || p.Commands[0][1] != "--soft" || p.Commands[0][2] != "abc1234def" {
 		t.Fatalf("commands = %v", p.Commands)
+	}
+}
+
+func TestBuildAmendUsesPreAmendHash(t *testing.T) {
+	p := Build(act(detect.KindCommit, "preamend0", "commit (amend): reworded"))
+	if !p.Supported || p.ClobbersWorkingTree {
+		t.Fatalf("amend undo should be supported and non-clobbering: %+v", p)
+	}
+	if len(p.Commands) != 1 || p.Commands[0][0] != "reset" || p.Commands[0][1] != "--soft" || p.Commands[0][2] != "preamend0" {
+		t.Fatalf("commands = %v, want reset --soft preamend0 (not HEAD~1)", p.Commands)
 	}
 }
 
