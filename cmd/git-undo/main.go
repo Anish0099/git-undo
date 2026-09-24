@@ -17,8 +17,9 @@ import (
 var version = "dev"
 
 // resolveVersion returns the release-injected version when present, otherwise
-// the module version embedded by `go install` (empty/"(devel)" for a plain
-// local build, which falls back to "dev").
+// the module version Go embeds (e.g. from `go install ...@vX`, or a VCS-stamped
+// `go build`). When build info is unavailable — empty or "(devel)", as with
+// -buildvcs=false or a non-module build — it falls back to "dev".
 func resolveVersion() string {
 	if version != "dev" {
 		return version
