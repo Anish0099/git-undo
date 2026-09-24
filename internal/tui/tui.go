@@ -36,7 +36,7 @@ func RenderPreview(a detect.Action, p plan.UndoPlan, v safety.Verdict) string {
 	return b.String()
 }
 
-// RenderList numbers actions 1-based, newest-first.
+// RenderList numbers actions 1-based in the order supplied (caller provides newest-first).
 func RenderList(actions []detect.Action) string {
 	var b strings.Builder
 	b.WriteString("Recent actions:\n")

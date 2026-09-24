@@ -60,3 +60,23 @@ func TestSelectFromList(t *testing.T) {
 		t.Fatalf("cancel = %d, want -1", cancel)
 	}
 }
+
+func TestRenderPreviewShowsManualHint(t *testing.T) {
+	a := detect.Action{Kind: detect.KindRebase, Summary: "rebase (finish)"}
+	p := plan.UndoPlan{Supported: false, Description: "This action is not yet supported.",
+		ManualHint: "run git reset --hard abc1234 manually"}
+	out := RenderPreview(a, p, safety.Verdict{Safe: true})
+	if !strings.Contains(out, "run git reset --hard abc1234 manually") {
+		t.Errorf("preview should show manual hint\n%s", out)
+	}
+}
+
+func TestRenderListShowsUnsupportedMarker(t *testing.T) {
+	acts := []detect.Action{
+		{Kind: detect.KindRebase, Entry: reflog.Entry{Old: "aaaaaaa"}, Summary: "rebase (finish)", Supported: false},
+	}
+	out := RenderList(acts)
+	if !strings.Contains(out, "(not supported yet)") {
+		t.Errorf("list should show unsupported marker\n%s", out)
+	}
+}
