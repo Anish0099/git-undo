@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/anish/git-undo/internal/detect"
-	"github.com/anish/git-undo/internal/plan"
-	"github.com/anish/git-undo/internal/safety"
+	"github.com/anish0099/git-undo/internal/detect"
+	"github.com/anish0099/git-undo/internal/plan"
+	"github.com/anish0099/git-undo/internal/safety"
 )
 
 // RenderPreview builds the plain-English preview for an action and its plan.

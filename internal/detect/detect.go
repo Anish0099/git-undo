@@ -4,7 +4,7 @@ package detect
 import (
 	"strings"
 
-	"github.com/anish/git-undo/internal/reflog"
+	"github.com/anish0099/git-undo/internal/reflog"
 )
 
 type Kind string

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/anish/git-undo/internal/detect"
+	"github.com/anish0099/git-undo/internal/detect"
 )
 
 const zeroHash = "0000000000000000000000000000000000000000"

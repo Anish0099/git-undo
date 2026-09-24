@@ -3,8 +3,8 @@ package plan
 import (
 	"testing"
 
-	"github.com/anish/git-undo/internal/detect"
-	"github.com/anish/git-undo/internal/reflog"
+	"github.com/anish0099/git-undo/internal/detect"
+	"github.com/anish0099/git-undo/internal/reflog"
 )
 
 func act(k detect.Kind, old, msg string) detect.Action {

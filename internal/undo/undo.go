@@ -7,12 +7,12 @@ import (
 	"io"
 	"time"
 
-	"github.com/anish/git-undo/internal/detect"
-	"github.com/anish/git-undo/internal/gitcmd"
-	"github.com/anish/git-undo/internal/plan"
-	"github.com/anish/git-undo/internal/reflog"
-	"github.com/anish/git-undo/internal/safety"
-	"github.com/anish/git-undo/internal/tui"
+	"github.com/anish0099/git-undo/internal/detect"
+	"github.com/anish0099/git-undo/internal/gitcmd"
+	"github.com/anish0099/git-undo/internal/plan"
+	"github.com/anish0099/git-undo/internal/reflog"
+	"github.com/anish0099/git-undo/internal/safety"
+	"github.com/anish0099/git-undo/internal/tui"
 )
 
 // Options configures a run.
