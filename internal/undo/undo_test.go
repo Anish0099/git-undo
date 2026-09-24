@@ -75,8 +75,28 @@ func TestUndoDryRunChangesNothing(t *testing.T) {
 	writeCommit(t, "b.txt", "b")
 	git(t, "reset", "--hard", "HEAD~1")
 	head := git(t, "rev-parse", "HEAD")
-	Run(Options{DryRun: true}, strings.NewReader(""), &strings.Builder{})
+	Run(Options{DryRun: true}, strings.NewReader("y\n"), &strings.Builder{})
 	if git(t, "rev-parse", "HEAD") != head {
 		t.Fatal("dry-run must not change HEAD")
+	}
+}
+
+func TestUndoDeclineThenPickExecutes(t *testing.T) {
+	newRepo(t)
+	writeCommit(t, "a.txt", "a")
+	writeCommit(t, "b.txt", "b")
+	before := git(t, "rev-parse", "HEAD")
+	git(t, "reset", "--hard", "HEAD~1")
+
+	code := Run(Options{}, strings.NewReader("n\n1\ny\n"), &strings.Builder{})
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	if got := git(t, "rev-parse", "HEAD"); got != before {
+		t.Fatalf("HEAD = %s, want restored %s", got, before)
+	}
+	// a backup ref must exist
+	if out := git(t, "for-each-ref", "refs/git-undo"); out == "" {
+		t.Fatal("expected a backup ref under refs/git-undo")
 	}
 }

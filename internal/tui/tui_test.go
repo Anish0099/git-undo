@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"bufio"
 	"strings"
 	"testing"
 
@@ -42,8 +43,8 @@ func TestRenderList(t *testing.T) {
 }
 
 func TestConfirm(t *testing.T) {
-	yes, _ := Confirm(strings.NewReader("y\n"), &strings.Builder{}, "?")
-	no, _ := Confirm(strings.NewReader("\n"), &strings.Builder{}, "?")
+	yes, _ := Confirm(bufio.NewReader(strings.NewReader("y\n")), &strings.Builder{}, "?")
+	no, _ := Confirm(bufio.NewReader(strings.NewReader("\n")), &strings.Builder{}, "?")
 	if !yes || no {
 		t.Fatalf("Confirm y=%v empty=%v", yes, no)
 	}
@@ -51,11 +52,11 @@ func TestConfirm(t *testing.T) {
 
 func TestSelectFromList(t *testing.T) {
 	acts := []detect.Action{{Summary: "a"}, {Summary: "b"}}
-	idx, _ := SelectFromList(strings.NewReader("2\n"), &strings.Builder{}, acts)
+	idx, _ := SelectFromList(bufio.NewReader(strings.NewReader("2\n")), &strings.Builder{}, acts)
 	if idx != 1 {
 		t.Fatalf("idx = %d, want 1", idx)
 	}
-	cancel, _ := SelectFromList(strings.NewReader("q\n"), &strings.Builder{}, acts)
+	cancel, _ := SelectFromList(bufio.NewReader(strings.NewReader("q\n")), &strings.Builder{}, acts)
 	if cancel != -1 {
 		t.Fatalf("cancel = %d, want -1", cancel)
 	}

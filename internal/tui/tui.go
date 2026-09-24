@@ -51,9 +51,9 @@ func RenderList(actions []detect.Action) string {
 }
 
 // Confirm returns true only for y/yes (case-insensitive).
-func Confirm(r io.Reader, w io.Writer, prompt string) (bool, error) {
+func Confirm(r *bufio.Reader, w io.Writer, prompt string) (bool, error) {
 	fmt.Fprint(w, prompt)
-	line, err := bufio.NewReader(r).ReadString('\n')
+	line, err := r.ReadString('\n')
 	if err != nil && line == "" {
 		return false, nil
 	}
@@ -62,10 +62,10 @@ func Confirm(r io.Reader, w io.Writer, prompt string) (bool, error) {
 }
 
 // SelectFromList reads a 1-based choice, returning a 0-based index or -1.
-func SelectFromList(r io.Reader, w io.Writer, actions []detect.Action) (int, error) {
+func SelectFromList(r *bufio.Reader, w io.Writer, actions []detect.Action) (int, error) {
 	fmt.Fprint(w, RenderList(actions))
 	fmt.Fprint(w, "Pick a number to undo (or press Enter/q to cancel): ")
-	line, _ := bufio.NewReader(r).ReadString('\n')
+	line, _ := r.ReadString('\n')
 	s := strings.TrimSpace(line)
 	if s == "" || strings.EqualFold(s, "q") {
 		return -1, nil

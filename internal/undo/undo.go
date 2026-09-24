@@ -2,6 +2,7 @@
 package undo
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"time"
@@ -23,7 +24,11 @@ type Options struct {
 
 // Run executes one git-undo invocation. Returns a process exit code.
 func Run(opts Options, in io.Reader, out io.Writer) int {
-	inRepo, _ := gitcmd.InRepo()
+	inRepo, err := gitcmd.InRepo()
+	if err != nil {
+		fmt.Fprintln(out, "git is not available:", err)
+		return 1
+	}
 	if !inRepo {
 		fmt.Fprintln(out, "Not a git repository. Run git-undo from inside one.")
 		return 1
@@ -40,9 +45,11 @@ func Run(opts Options, in io.Reader, out io.Writer) int {
 		return 0
 	}
 
+	br := bufio.NewReader(in)
+
 	chosen := actions[0]
 	if opts.List {
-		idx, _ := tui.SelectFromList(in, out, actions)
+		idx, _ := tui.SelectFromList(br, out, actions)
 		if idx < 0 {
 			fmt.Fprintln(out, "Cancelled.")
 			return 0
@@ -52,6 +59,10 @@ func Run(opts Options, in io.Reader, out io.Writer) int {
 
 	for {
 		p := plan.Build(chosen)
+		if !p.Supported {
+			fmt.Fprint(out, tui.RenderPreview(chosen, p, safety.Verdict{}))
+			return 0
+		}
 		st, err := gitcmd.ReadState()
 		if err != nil {
 			fmt.Fprintln(out, "Could not read repo state:", err)
@@ -59,23 +70,17 @@ func Run(opts Options, in io.Reader, out io.Writer) int {
 		}
 		v := safety.Guard(p, st, opts.Force)
 		fmt.Fprint(out, tui.RenderPreview(chosen, p, v))
-
-		if !p.Supported {
-			return 0
-		}
 		if !v.Safe {
 			return 1
 		}
 		if opts.DryRun {
 			return 0
 		}
-
-		ok, _ := tui.Confirm(in, out, "\nProceed? [y/N] ")
+		ok, _ := tui.Confirm(br, out, "\nProceed? [y/N] ")
 		if ok {
 			return execute(p, out)
 		}
-
-		idx, _ := tui.SelectFromList(in, out, actions)
+		idx, _ := tui.SelectFromList(br, out, actions)
 		if idx < 0 {
 			fmt.Fprintln(out, "Cancelled. Nothing was changed.")
 			return 0
