@@ -44,3 +44,20 @@ func TestBackupRefName(t *testing.T) {
 		t.Fatalf("BackupRefName = %q, want %q", got, want)
 	}
 }
+
+func TestBackupRefNameNonUTC(t *testing.T) {
+	loc := time.FixedZone("X+5", 5*3600) // UTC+5
+	got := BackupRefName(time.Date(2026, 9, 24, 14, 32, 5, 0, loc)) // 09:32:05 UTC
+	want := "refs/git-undo/backup-20260924-093205"
+	if got != want {
+		t.Fatalf("BackupRefName(non-UTC) = %q, want %q", got, want)
+	}
+}
+
+func TestGuardBlocksUnsupported(t *testing.T) {
+	p := plan.UndoPlan{Supported: false}
+	v := Guard(p, gitcmd.RepoState{}, false)
+	if v.Safe || len(v.Blockers) == 0 {
+		t.Fatalf("unsupported plan should block: %+v", v)
+	}
+}
