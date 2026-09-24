@@ -4,8 +4,8 @@ package safety
 import (
 	"time"
 
-	"github.com/anish/git-undo/internal/gitcmd"
-	"github.com/anish/git-undo/internal/plan"
+	"github.com/anish0099/git-undo/internal/gitcmd"
+	"github.com/anish0099/git-undo/internal/plan"
 )
 
 // Verdict is the guard's decision.

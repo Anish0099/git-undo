@@ -6,10 +6,13 @@ import (
 	"io"
 	"os"
 
-	"github.com/anish/git-undo/internal/undo"
+	"github.com/anish0099/git-undo/internal/undo"
 )
 
-var version = "0.1.0-dev"
+// version is overridden at release build time via
+// -ldflags "-X main.version=<tag>" (see .goreleaser.yaml). Local/dev builds
+// report "dev".
+var version = "dev"
 
 func run(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("git-undo", flag.ContinueOnError)

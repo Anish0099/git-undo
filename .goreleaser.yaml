@@ -1,0 +1,60 @@
+# GoReleaser configuration for git-undo.
+# Validate locally with:  goreleaser check
+# Cut a release with:     git tag v0.1.0 && git push origin v0.1.0
+#                         (the release workflow runs GoReleaser automatically)
+version: 2
+
+project_name: git-undo
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: git-undo
+    main: ./cmd/git-undo
+    binary: git-undo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      # Windows on arm64 has a negligible CLI audience; skip it.
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - id: git-undo
+    ids:
+      - git-undo
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  draft: false

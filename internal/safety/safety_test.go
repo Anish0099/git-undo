@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anish/git-undo/internal/gitcmd"
-	"github.com/anish/git-undo/internal/plan"
+	"github.com/anish0099/git-undo/internal/gitcmd"
+	"github.com/anish0099/git-undo/internal/plan"
 )
 
 func TestGuardBlocksDirtyClobber(t *testing.T) {
