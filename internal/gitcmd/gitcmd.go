@@ -2,6 +2,7 @@
 package gitcmd
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -34,7 +35,11 @@ func Run(args ...string) error {
 func InRepo() (bool, error) {
 	out, err := Capture("rev-parse", "--is-inside-work-tree")
 	if err != nil {
-		return false, nil // git exits non-zero outside a repo; treat as "not in repo"
+		var execErr *exec.Error
+		if errors.As(err, &execErr) {
+			return false, err // git not found / not executable
+		}
+		return false, nil // git ran and said: not a work tree
 	}
 	return out == "true", nil
 }

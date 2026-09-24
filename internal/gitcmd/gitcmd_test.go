@@ -49,3 +49,12 @@ func TestReadHeadLogHasEntries(t *testing.T) {
 		t.Fatal("expected reflog content after a commit")
 	}
 }
+
+func TestInRepoNotARepo(t *testing.T) {
+	dir := t.TempDir()
+	t.Chdir(dir)
+	in, err := InRepo()
+	if err != nil || in {
+		t.Fatalf("InRepo = %v, %v; want false, nil", in, err)
+	}
+}
